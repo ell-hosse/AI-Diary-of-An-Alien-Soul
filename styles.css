@@ -1,153 +1,152 @@
 body {
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-family: 'Inter', sans-serif;
   background: #0d0d0d;
-  color: #eaeaea;
+  color: #eee;
   text-align: center;
-  padding: 20px;
   margin: 0;
+  padding: 20px;
 }
 
 h1 {
-  font-size: 2.2em;
-  margin-bottom: 40px;
-  color: #ffffff;
+  font-size: 2em;
+  margin-bottom: 30px;
   letter-spacing: 1px;
 }
 
 .gallery {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  justify-items: center;
 }
 
 .image-card {
-  width: 250px;
+  width: 100%;
+  max-width: 240px;
   cursor: pointer;
-  background-color: #1a1a1a;
+  background: #1a1a1a;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 0 8px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
   transition: transform 0.2s ease;
 }
 
 .image-card:hover {
-  transform: scale(1.02);
+  transform: scale(1.03);
 }
 
 .image-card img {
   width: 100%;
   display: block;
-  border-bottom: 1px solid #333;
 }
 
 .caption {
-  padding: 12px;
-  font-size: 0.95em;
-  color: #ccc;
+  padding: 10px;
+  font-size: 0.9em;
   text-align: left;
 }
 
 .caption .title {
-  font-weight: bold;
-  color: #fff;
+  font-weight: 600;
 }
 
 .caption .date {
   font-size: 0.8em;
-  color: #888;
-  margin-top: 6px;
+  color: #bbb;
+  margin-top: 4px;
 }
 
 /* Modal */
 .modal {
-  display: none;
   position: fixed;
-  z-index: 10;
-  padding-top: 60px;
-  left: 0;
   top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.95);
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.9);
+  display: none;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.modal-content {
+  max-width: 90vw;
+  max-height: 70vh;
+  width: auto;
+  height: auto;
+  border-radius: 10px;
+  transition: filter 0.3s ease;
+  object-fit: contain;
+}
+
+.modal-caption {
+  margin-top: 12px;
+  background: rgba(50, 50, 50, 0.7);
+  color: #eee;
+  font-size: 0.9em;
+  padding: 8px 16px;
+  border-radius: 8px;
+  max-width: 90vw;
+  text-align: center;
+  word-break: break-word;
+}
+
+.modal-image-wrapper {
+  position: relative;
+  display: flex;
   align-items: center;
   justify-content: center;
 }
 
+.nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(80, 80, 80, 0.7);
+  color: #fff;
+  border: none;
+  font-size: 1.8em;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  user-select: none;
+}
+
+.nav-button:hover {
+  background: rgba(100, 100, 100, 0.9);
+}
+
+.nav-button.left {
+  left: 0;              /* ← flush to left of image */
+}
+
+.nav-button.right {
+  right: 0;             /* → flush to right of image */
+}
+
 .modal-content {
-  max-width: 90%;
-  max-height: 80vh;  /* ← scale by viewport */
-  width: auto;
-  height: auto;
-  display: block;
-  margin: auto;
+  max-width: 90vw;
+  max-height: 70vh;
   border-radius: 10px;
-  transition: filter 0.4s ease, opacity 0.4s ease;
-}
-
-#modal-caption {
-  margin: 15px auto;
-  color: #ccc;
-  font-size: 1em;
-}
-
-.modal-caption {
-    background: rgb(106 106 106 / 60%);
-    color: #eee;
-    font-size: 1em;
-    padding: 16px;
-    margin-top: 12px;
-    width: fit-content;
-    max-width: 90%;
-    border-radius: 8px;
-    font-family: 'Inter', sans-serif;
+  object-fit: contain;
+  display: block;
 }
 
 .close {
   position: absolute;
-  top: 25px;
-  right: 35px;
-  color: #fff;
-  font-size: 40px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.nav {
-  margin-top: 20px;
-}
-
-.nav button {
+  top: 12px;
+  right: 12px;
   font-size: 2em;
+  color: #fff;
   background: none;
   border: none;
-  color: white;
   cursor: pointer;
 }
 
-.nav {
-  position: absolute;
-  top: 50%;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  transform: translateY(-50%);
-  pointer-events: none; /* prevent nav from blocking image clicks */
-}
-
-.nav button {
-  background: rgba(106, 106, 106, 0.6);
-  color: #eee;
-  font-size: 2em;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  pointer-events: auto; /* enable button clicks */
-  transition: background 0.3s ease;
-}
-
-.nav button:hover {
-  background: rgba(106, 106, 106, 0.8);
+body.modal-open {
+  overflow: hidden;
 }
