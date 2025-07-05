@@ -158,4 +158,8 @@ body.modal-open {
   .nav-button.right {
     right: 0;
   }
+
+  .page-title {
+    font-size: medium;
+  }
 }
