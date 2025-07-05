@@ -15,7 +15,7 @@ h1 {
 
 .gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 16px;
   justify-items: center;
 }
@@ -56,7 +56,6 @@ h1 {
   margin-top: 4px;
 }
 
-/* Modal */
 .modal {
   position: fixed;
   top: 0;
@@ -80,6 +79,7 @@ h1 {
   border-radius: 10px;
   transition: filter 0.3s ease;
   object-fit: contain;
+  display: block;
 }
 
 .modal-caption {
@@ -102,9 +102,7 @@ h1 {
 }
 
 .nav-button {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+  position: static;
   background: rgba(80, 80, 80, 0.7);
   color: #fff;
   border: none;
@@ -114,6 +112,7 @@ h1 {
   cursor: pointer;
   transition: background 0.2s ease;
   user-select: none;
+  margin: 0 10px;
 }
 
 .nav-button:hover {
@@ -121,19 +120,11 @@ h1 {
 }
 
 .nav-button.left {
-  left: 0;              /* ← flush to left of image */
+  left: 0;
 }
 
 .nav-button.right {
-  right: 0;             /* → flush to right of image */
-}
-
-.modal-content {
-  max-width: 90vw;
-  max-height: 70vh;
-  border-radius: 10px;
-  object-fit: contain;
-  display: block;
+  right: 0;
 }
 
 .close {
@@ -149,4 +140,22 @@ h1 {
 
 body.modal-open {
   overflow: hidden;
+}
+
+@media (max-width: 600px) {
+  .gallery {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .nav-button {
+    position: absolute;
+  }
+
+  .nav-button.left {
+    left: 0;
+  }
+
+  .nav-button.right {
+    right: 0;
+  }
 }
