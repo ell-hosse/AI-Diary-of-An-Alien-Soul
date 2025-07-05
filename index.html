@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Diary of An Alien Soul</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <h1>🪐 AI Diary of An Alien Soul</h1>
+  <div id="gallery" class="gallery"></div>
+
+  <div id="modal" class="modal" onclick="closeModal()">
+    <span class="close">&times;</span>
+    <img class="modal-content" id="modal-img">
+    <div id="modal-caption" class="modal-caption"></div>
+    <div class="nav">
+      <button onclick="event.stopPropagation(); prevImage()">⟵</button>
+      <button onclick="event.stopPropagation(); nextImage()">⟶</button>
+    </div>
+  </div>
+
+  <script src="scripts.js"></script>
+  <script>
+    fetch('metadata.json')
+      .then(res => res.json())
+      .then(data => {
+        // Sort by newest first
+        data.sort((a, b) => new Date(b.creation_date) - new Date(a.creation_date));
+
+        const gallery = document.getElementById('gallery');
+        data.forEach((item, index) => {
+          const card = document.createElement('div');
+          card.className = 'image-card';
+          card.setAttribute('onclick', `openModalByIndex(${index})`);
+
+          const img = document.createElement('img');
+          img.src = 'images/thumbs/' + item.filename;
+          img.alt = item.title;
+          img.loading = 'lazy';
+
+          const caption = document.createElement('div');
+          caption.className = 'caption';
+          caption.innerHTML = `
+            <div class="title">${item.title}</div>
+            <div class="date">📅 ${item.creation_date.split(" ")[0]}</div>
+          `;
+
+          card.appendChild(img);
+          card.appendChild(caption);
+          gallery.appendChild(card);
+        });
+
+        window.galleryData = data;
+      });
+  </script>
+</body>
+</html>
+</title>
+</head>
+<body>
+
+</body>
+</html>
