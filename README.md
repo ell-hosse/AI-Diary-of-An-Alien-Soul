@@ -1,6 +1,12 @@
 # AI Diary of An Alien Soul
 
 🌌 A poetic, visual diary — a gallery of AI-generated images telling fragments of an alien soul’s journey through chaos and wonder.
-
 **Live site:** [https://ell-hosse.github.io/AI-Diary-of-An-Alien-Soul/](https://ell-hosse.github.io/AI-Diary-of-An-Alien-Soul/)
-
+<p align="center">
+  <a href="https://ell-hosse.github.io/AI-Diary-of-An-Alien-Soul/">
+    <img
+      src="https://image.thum.io/get/width/1200/crop/800/https://ell-hosse.github.io/AI-Diary-of-An-Alien-Soul/?v=20250712"
+      alt="Live preview of AI Diary of An Alien Soul"
+      width="800">
+  </a>
+</p>
