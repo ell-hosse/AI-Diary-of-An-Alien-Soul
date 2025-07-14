@@ -47,7 +47,7 @@ jobs:
 
         # Diff against the previous commit on this branch
         ADDED=$(git diff --name-status ${{ github.event.before }} ${{ github.sha }} \
-                   | awk '$1=="A"{print $2}' \
+                   | sed 's/^A\s\+//' \
                    | grep -Ei '^images/original/.*\.(png|jpe?g)$' || true)
 
         echo "Added files:"
