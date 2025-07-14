@@ -3,15 +3,41 @@ import os
 import sys
 from datetime import datetime
 import json
+import re
+from pathlib import Path
 
 METADATA_PATH = "metadata.json"
 ORIGINAL_DIR = 'images/original'
 THUMBS_DIR = 'images/thumbs'
+README_PATH = Path("README.md")
 
 COMPRESSED_WIDTH = 1200
 THUMB_WIDTH = 300
 
 os.makedirs(THUMBS_DIR, exist_ok=True)
+
+def update_image_preview_version() -> None:
+    try:
+        text = README_PATH.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        print("README.md not found – skipping preview bump.")
+        return
+
+    pattern = re.compile(r"(\?v=)(\d{7})")
+    match = pattern.search(text)
+
+    if not match:
+        print("No 7-digit version parameter found in README – skipping.")
+        return
+
+    old_version = int(match.group(2))
+    new_version = old_version + 1 if old_version < 9999999 else 1
+    new_version_str = f"{new_version:07d}"
+
+    updated_text = pattern.sub(rf"\1{new_version_str}", text, count=1)
+    README_PATH.write_text(updated_text, encoding="utf-8")
+
+    print(f"✔ Preview version bumped: {old_version:07d} → {new_version_str}")
 
 def extract_creation_date(filename: str) -> str:
     base = os.path.splitext(filename)[0]
@@ -93,3 +119,5 @@ if __name__ == "__main__":
 
         if title:
             add_metadata_entry(filename, title)
+
+    update_image_preview_version()
