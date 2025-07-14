@@ -4,77 +4,60 @@ on:
   push:
     branches: [main]
     paths:
-      - 'images/original/**.png'
-      - 'images/original/**.jpg'
-      - 'images/original/**.jpeg'
+      - 'images/original/**.[Pp][Nn][Gg]'
+      - 'images/original/**.[Jj][Pp][Gg]'
+      - 'images/original/**.[Jj][Pp][Ee][Gg]'
 
 jobs:
   build-gallery:
     runs-on: ubuntu-latest
 
     steps:
-      # ------------------------------------------------------------------
-      # 0. Checkout the repository
-      # ------------------------------------------------------------------
-      - name: Check out repo
+      - name: Check out repo (keep two commits so diff works)
         uses: actions/checkout@v4
         with:
+          fetch-depth: 2        # <-- important
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Python
+      - name: Set up Python & Pillow
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - run: pip install pillow
 
-      - name: Install Pillow
-        run: pip install pillow
-
-      # ------------------------------------------------------------------
-      # 1. Find newly-added images in *this* push
-      # ------------------------------------------------------------------
-      - name: Collect added image paths
+      # Grab *added* files from Git diff
+      - name: Collect added images
         id: added
         run: |
-          ADDED=$(git diff --name-status ${{ github.event.before }} ${{ github.sha }} \
-                   | awk '$1=="A"{print $2}' \
-                   | grep -Ei '^images/original/.*\.(png|jpe?g)$' || true)
+          ADDED=$(git diff --name-status HEAD~1 HEAD \
+                  | awk '$1=="A"{print $2}' \
+                  | grep -Ei '^images/original/.*\.(png|jpe?g)$' || true)
+          echo "Added files:"; echo "$ADDED"
           echo "added<<EOF" >> $GITHUB_OUTPUT
           echo "$ADDED"     >> $GITHUB_OUTPUT
           echo "EOF"        >> $GITHUB_OUTPUT
 
-      # ------------------------------------------------------------------
-      # 2. Entire commit message = title
-      # ------------------------------------------------------------------
-      - name: Capture commit message as title
+      # Entire commit message is the title
+      - name: Extract title
         id: title
         run: |
           TITLE="${{ github.event.head_commit.message }}"
-          # collapse newlines -> spaces so it stays one CLI arg
-          TITLE_SINGLELINE=$(echo "$TITLE" | tr '\n' ' ' | sed 's/  */ /g')
-          echo "title=$TITLE_SINGLELINE" >> $GITHUB_OUTPUT
+          TITLE_SINGLE=$(echo "$TITLE" | tr '\n' ' ' | sed 's/  */ /g')
+          echo "title=$TITLE_SINGLE" >> $GITHUB_OUTPUT
 
-      # ------------------------------------------------------------------
-      # 3. Run your resize / metadata script for each new image
-      # ------------------------------------------------------------------
       - name: Run generate_resized_images.py
         if: steps.added.outputs.added != ''
         run: |
           while read -r FILE; do
             [ -z "$FILE" ] && continue
-            BASENAME=$(basename "$FILE")
-            echo "▶ Processing $BASENAME"
-            python generate_resized_images.py "$BASENAME" "${{ steps.title.outputs.title }}"
+            python generate_resized_images.py "$(basename "$FILE")" "${{ steps.title.outputs.title }}"
           done <<< "${{ steps.added.outputs.added }}"
 
-      # ------------------------------------------------------------------
-      # 4. Commit thumbnail, metadata.json, README bump
-      # ------------------------------------------------------------------
-      - name: Commit and push changes
+      - name: Commit thumbnails, metadata, README bump
         if: steps.added.outputs.added != ''
         run: |
-          git config user.name  "github-actions"
-          git config user.email "actions@github.com"
-
+          git config user.name  github-actions
+          git config user.email actions@github.com
           git add images/thumbs metadata.json README.md
-          git commit -m "chore: auto-process new gallery images [skip ci]" || exit 0
+          git commit -m "chore: process new gallery images [skip ci]" || exit 0
           git push
