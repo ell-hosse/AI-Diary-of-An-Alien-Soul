@@ -6,10 +6,11 @@ import json
 import re
 from pathlib import Path
 
-METADATA_PATH = "metadata.json"
-ORIGINAL_DIR = 'images/original'
-THUMBS_DIR = 'images/thumbs'
-README_PATH = Path("README.md")
+ROOT = Path(__file__).parent
+METADATA_PATH = ROOT / "metadata.json"
+ORIGINAL_DIR = ROOT / "images" / "original"
+THUMBS_DIR = ROOT / "images" / "thumbs"
+README_PATH = ROOT / "README.md"
 
 COMPRESSED_WIDTH = 1200
 THUMB_WIDTH = 300
