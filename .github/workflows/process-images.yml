@@ -1,5 +1,8 @@
 name: Process gallery images
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: [main]
