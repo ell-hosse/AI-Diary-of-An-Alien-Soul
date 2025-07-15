@@ -24,21 +24,24 @@ def update_image_preview_version() -> None:
         print("README.md not found – skipping preview bump.")
         return
 
-    pattern = re.compile(r"(\?v=)(\d{7})")
+    pattern = re.compile(r"\?v=(\d{7})")
     match = pattern.search(text)
 
-    if not match:
-        print("No 7-digit version parameter found in README – skipping.")
-        return
+    if match:
+        old_num = int(match.group(1))
+        new_num = 1 if old_num >= 9_999_999 else old_num + 1
+        replacement = f"?v={new_num:07d}"
+        bumped = pattern.sub(replacement, text, count=1)
+        print(f"✔ Preview version bumped: {old_num:07d} → {new_num:07d}")
+    else:
+        bumped = text.replace(
+            'AI-Diary-of-An-Alien-Soul/"',
+            'AI-Diary-of-An-Alien-Soul/?v=0000001"',
+            1
+        )
+        print("✔ Preview version added: 0000001")
 
-    old_version = int(match.group(2))
-    new_version = old_version + 1 if old_version < 9999999 else 1
-    new_version_str = f"{new_version:07d}"
-
-    updated_text = pattern.sub(rf"\1{new_version_str}", text, count=1)
-    README_PATH.write_text(updated_text, encoding="utf-8")
-
-    print(f"✔ Preview version bumped: {old_version:07d} → {new_version_str}")
+    README_PATH.write_text(bumped, encoding="utf-8")
 
 def extract_creation_date(filename: str) -> str:
     base = os.path.splitext(filename)[0]
