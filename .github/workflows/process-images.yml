@@ -1,11 +1,8 @@
 name: Process gallery images
 
-# ---------------------------------------------------------
-# 1 · Trigger only when PNG/JPG are ADDED under images/original
-# ---------------------------------------------------------
 on:
   push:
-    branches: [main]                    # adjust if your default branch is different
+    branches: [main]
     paths:
       - 'images/original/**.[Pp][Nn][Gg]'
       - 'images/original/**.[Jj][Pp][Gg]'
@@ -16,92 +13,66 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # -----------------------------------------------------
-    # 2 · Checkout entire history (fetch-depth: 0) so we can diff
-    # -----------------------------------------------------
-    - name: Checkout repository
-      uses: actions/checkout@v4
+    # 1 ▸ checkout full history so git diff works
+    - uses: actions/checkout@v4
       with:
-        fetch-depth: 0               # full history; needed for git diff
+        fetch-depth: 0
         token: ${{ secrets.GITHUB_TOKEN }}
 
-    # -----------------------------------------------------
-    # 3 · Set up Python and Pillow
-    # -----------------------------------------------------
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v5
+    # 2 ▸ python + Pillow
+    - uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: "3.11"
+    - run: pip install pillow
 
-    - name: Install Pillow
-      run: pip install pillow
-
-    # -----------------------------------------------------
-    # 4 · Collect NEWLY-ADDED images in this push
-    # -----------------------------------------------------
-    - name: Find added images
-      id: added
+    # 3 ▸ list newly-ADDED images (path may contain spaces / commas)
+    - id: added
+      name: Find added images
       shell: bash
       run: |
         set -euo pipefail
-
-        # Diff against the previous commit on this branch
-        ADDED=$(git diff --name-status ${{ github.event.before }} ${{ github.sha }} \
-                   | sed 's/^A\s\+//' \
-                   | grep -Ei '^images/original/.*\.(png|jpe?g)$' || true)
-
+        LIST=$(git diff --diff-filter=A --name-only \
+                "${{ github.event.before }}" "${{ github.sha }}" \
+              | grep -Ei '^images/original/.*\.(png|jpe?g)$' || true)
         echo "Added files:"
-        echo "$ADDED"
+        printf '%s\n' "$LIST"
+        echo "added<<EOF"   >> "$GITHUB_OUTPUT"
+        printf '%s\n' "$LIST" >> "$GITHUB_OUTPUT"
+        echo "EOF"          >> "$GITHUB_OUTPUT"
 
-        echo "added<<EOF" >> "$GITHUB_OUTPUT"
-        echo "$ADDED"     >> "$GITHUB_OUTPUT"
-        echo "EOF"        >> "$GITHUB_OUTPUT"
-
-    # -----------------------------------------------------
-    # 5 · Grab WHOLE commit message as the title (works for web uploads too)
-    # -----------------------------------------------------
-    - name: Extract title = full commit message
-      id: title
+    # 4 ▸ full commit message becomes the title
+    - id: title
+      name: Capture commit message as title
       shell: bash
       run: |
         TITLE="${{ github.event.head_commit.message }}"
-        # collapse newlines to single spaces so it fits as one CLI arg
         CLEAN=$(echo "$TITLE" | tr '\n' ' ' | sed 's/  */ /g')
-        echo "Title: $CLEAN"
         echo "title=$CLEAN" >> "$GITHUB_OUTPUT"
 
-    # -----------------------------------------------------
-    # 6 · Run generate_resized_images.py for each new image
-    # -----------------------------------------------------
-    - name: Generate thumbnails & update metadata
+    # 5 ▸ run your script for each new image (paths with spaces handled)
+    - name: Generate thumbnails & metadata
       if: steps.added.outputs.added != ''
       shell: bash
       run: |
         set -euo pipefail
-        IFS=$'\n'
-        for FILE in ${{ steps.added.outputs.added }}; do
-          [ -z "$FILE" ] && continue
+        while IFS= read -r FILE; do
+          [ -z "$FILE" ] && continue   # skip empty lines
           BASENAME=$(basename "$FILE")
-          echo "▶ Processing $BASENAME"
+          echo "▶ python generate_resized_images.py \"$BASENAME\" \"${{ steps.title.outputs.title }}\""
           python generate_resized_images.py "$BASENAME" "${{ steps.title.outputs.title }}"
-        done
+        done <<< "${{ steps.added.outputs.added }}"
 
-    # -----------------------------------------------------
-    # 7 · Commit thumbnails, metadata.json, README.md (cache-buster)
-    # -----------------------------------------------------
-    - name: Commit and push generated files
+    # 6 ▸ commit thumbnails, metadata.json, README bump
+    - name: Commit generated files
       if: steps.added.outputs.added != ''
       shell: bash
       run: |
         set -euo pipefail
-        git config user.name  "github-actions"
-        git config user.email "actions@github.com"
-
+        git config user.name  github-actions
+        git config user.email actions@github.com
         git add images/thumbs metadata.json README.md || true
-
-        # Only commit if there are staged changes
         if git diff --cached --quiet; then
-          echo "No changes to commit."
+          echo "Nothing to commit."
         else
           git commit -m "chore: auto-process new gallery images [skip ci]"
           git push
