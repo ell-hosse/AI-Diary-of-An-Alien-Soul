@@ -6,7 +6,7 @@
 <p align="center">
   <a href="https://ell-hosse.github.io/AI-Diary-of-An-Alien-Soul/">
     <img
-      src="https://image.thum.io/get/maxAge/100/width/2000/crop/800/https://ell-hosse.github.io/AI-Diary-of-An-Alien-Soul/?v=0000013"
+      src="https://image.thum.io/get/maxAge/100/width/2000/crop/800/https://ell-hosse.github.io/AI-Diary-of-An-Alien-Soul/?v=0000014"
       alt="Live preview of AI Diary of An Alien Soul"
       width="800">
   </a>
